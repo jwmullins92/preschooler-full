@@ -1,0 +1,5 @@
+body {
+    min-height: 100vh;
+    min-width: 100vw;
+    background: linear-gradient(40deg, rgb(236, 240, 241) 0%, rgb(189, 195, 199) 100%) repeat;
+}
