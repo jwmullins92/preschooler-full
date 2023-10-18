@@ -2,30 +2,23 @@ import './App.css'
 import {Route, Routes} from "react-router";
 import Home from "./screens/Home";
 import Navbar from "./components/Navbar";
-import {useEffect, useState} from "react";
-import {Parent} from "../../hello-cdk/lib/types/types";
-import {apiGet} from "./utils/functions";
+import {UserContextProvider} from "./context/UserContext";
+
+export const userId = `652eb86a10a352bcb2010ad6`
 
 function App() {
 
-    const [parents, setParents] = useState<Parent[]>()
-
-    useEffect(() => {
-        apiGet(`/parents`).then(setParents)
-    }, [])
-
-    console.log(parents)
 
   return (
-      <div className={'h-screen w-screen'} >
+      <UserContextProvider>
           <Navbar />
-          <div className={'relative top-[var(--header-height)]'}>
+          <div className={'relative top-[var(--header-height)] px-4 z-10'}>
           <Routes>
               <Route path={`/`} element={<Home />} >
               </Route>
           </Routes>
           </div>
-      </div>
+      </UserContextProvider>
   )
 }
 

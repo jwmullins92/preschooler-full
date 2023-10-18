@@ -11,6 +11,9 @@ export default {
       },
       height: {
         'header': 'var(--header-height)'
+      },
+      fontFamily: {
+        lato: ['Lato', 'sans-serif']
       }
     },
   },

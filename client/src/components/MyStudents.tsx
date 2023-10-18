@@ -1,26 +1,19 @@
-import {useEffect, useState} from 'react';
-import {Student} from "../../../lib/types/types.ts";
-import {apiGet} from "../utils/functions.ts";
+import {UserContext} from "../context/UserContext";
+import {useContext} from "react";
+import {ParentWithId} from "../../../hello-cdk/lib/types/types";
 
 const MyStudents = () => {
 
-    const [students, setStudents] = useState<Student[]>()
-
-    useEffect(() => {
-        apiGet('/students').then(setStudents)
-    }, [])
-
+    const user = useContext(UserContext) as ParentWithId
     return (
-        <div>
-            <h2>
+        <div className='border w-1/3 bg-white p-4 drop-shadow-lg'>
+            <h2 className='font-lato'>
                 My Students
             </h2>
             {
-                students && students.map(student => {
+                user?.students && user.students.map(student => {
                     return (
-                        <div>
-                            <p>{student.last_name} {student.last_name}</p>
-                        </div>
+                            <p className='font-lato' key={student._id}>{student.firstName} {student.lastName}</p>
                     )
                 })
             }

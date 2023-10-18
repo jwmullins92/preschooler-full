@@ -1,37 +1,36 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
 
-export type Parent = {
-	id: number
+type WithId = { _id: string }
+
+export type User = {
 	email: string
-	first_name: string
-	last_name: string
-	phone_number: string
+	firstName: string
+	lastName: string
+	phoneNumber: string
 	address: string
-};
+	roles: (`parent` | `teacher` | `admin`)[]
+}
+export type UserWithId = User & WithId
+
+export type Parent = User & { students: StudentWithId[] };
+export type ParentWithId = Parent & WithId
 
 export type Student = {
-	id: number
-	first_name: string
-	last_name: string
-	birth_date: Date | number | string
+	firstName: string
+	lastName: string
+	birthDate: Date | number | string
 };
+export type StudentWithId = Student & WithId
 
 export type Class = {
-	id: number
-	school_year: string
-	archived: DBBoolean
+	schoolYear: string
+	archived: boolean
 	name: string
 };
+export type ClassWithId = Class & WithId
 
-export type Teacher = {
-	id: number
-	email: string
-	first_name: string
-	last_name: string
-	is_active: DBBoolean
-	is_administrator: DBBoolean
-};
+export type Teacher = User
+export type TeacherWithId = Teacher & WithId
 
-export type DBBoolean = 0 | 1;
 export type HTTPOptions = `DELETE` | `GET` | `POST` | `PUT`;
 export type EndpointHandler = Record<string, Partial<Record<HTTPOptions, (event: APIGatewayProxyEvent) => Promise<Record<string, unknown> | Record<string, unknown>[] >>>>;

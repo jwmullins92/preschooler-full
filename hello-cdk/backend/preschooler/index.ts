@@ -3,9 +3,10 @@ import * as serverless from "serverless-http"
 import * as bodyParser from "body-parser"
 import * as mongoose from "mongoose"
 import * as dotenv from "dotenv"
-import {UserSchema} from "./models/User";
-import {StudentSchema} from "./models/Student";
-import {ClassSchema} from "./models/Class";
+import * as cors from "cors"
+import {MongoUser, UserSchema} from "./models/User";
+import {MongoStudent, StudentSchema} from "./models/Student";
+import {ClassSchema, MongoClass} from "./models/Class";
 
 dotenv.config()
 
@@ -13,9 +14,19 @@ const isLocal = process.env.ENVIRONMENT == `local`
 
 const app = express()
 app.use(bodyParser.json({strict: false}))
+app.use(cors())
 mongoose.connect(process.env.MONGO_URL!)
     .then(() => console.log(`DB connected`))
     .catch((err) => console.error(`Could not connect`, err))
+
+type MongoTypes = MongoStudent | MongoClass | MongoUser;
+
+
+const mongo = {
+    get: async <T extends MongoTypes>(id: string, Model: mongoose.Model<T>) => {
+        return Model.findById(id)
+    }
+}
 
 app.get(`/users`, async (req, res) => {
     const { role } = req.query
@@ -30,10 +41,30 @@ app.get(`/users`, async (req, res) => {
 
 app.get(`/user/:id`, async (req, res) => {
     try {
-        const user = await UserSchema.findById(req.params.id).populate(`students`)
+        const user = await mongo.get(req.params.id, UserSchema)
         res.json(user)
     } catch (err) {
         console.error(`Could not get user`, err)
+        res.json(err)
+    }
+})
+
+app.put('/user/:id', async (req, res) => {
+    try {
+        const parent = await UserSchema.findByIdAndUpdate(req.params.id, req.body, {new: true})
+        res.json(parent)
+    } catch (err) {
+        console.log(err)
+        res.json(err)
+    }
+})
+
+app.delete(`/user/:id`, async (req, res) => {
+    try {
+        const deletedParent = await UserSchema.deleteOne({ _id: req.params.id })
+        res.json(deletedParent)
+    } catch (err) {
+        console.log(err)
         res.json(err)
     }
 })
@@ -48,25 +79,7 @@ app.post('/parent', async (req, res) => {
     }
 })
 
-app.put('/parent/:id', async (req, res) => {
-    try {
-        const parent = await UserSchema.findByIdAndUpdate(req.params.id, req.body, {new: true})
-        res.json(parent)
-    } catch (err) {
-        console.log(err)
-        res.json(err)
-    }
-})
 
-app.delete(`/parent/:id`, async (req, res) => {
-    try {
-        const deletedParent = await UserSchema.findByIdAndDelete(req.params.id)
-        res.json(deletedParent)
-    } catch (err) {
-        console.log(err)
-        res.json(err)
-    }
-})
 
 app.post('/teacher', async (req, res) => {
     try {
@@ -105,6 +118,7 @@ app.get(`/student/:id`, async (req, res) => {
         res.json(err)
     }
 })
+
 app.post(`/student`, async (req, res) => {
     const session = await mongoose.startSession()
     try {
@@ -123,6 +137,23 @@ app.post(`/student`, async (req, res) => {
     }
 })
 
+app.put('/student/:id', async (req, res) => {
+    try {
+        res.json(await StudentSchema.findByIdAndUpdate(req.params.id, req.body, {new: true}))
+    } catch (err) {
+        console.log(err)
+        res.json(err)
+    }
+})
+
+app.delete(`/student/:id`, async (req, res) => {
+    try {
+        res.json(await StudentSchema.deleteOne({ _id: req.params.id }))
+    } catch (err) {
+        console.log(err)
+        res.json(err)
+    }
+})
 
 app.get(`/classes`, async (req, res) => {
     try {
@@ -147,13 +178,30 @@ app.get(`/class/:id`, async (req, res) => {
 app.post(`/class`, async (req, res) => {
     try {
         const newClass = await new ClassSchema(req.body).save()
-        console.log('here')
         res.json(newClass)
     } catch (err) {
         console.log(`Could not create class`, err)
         res.json({
             Error: err.message
         })
+    }
+})
+
+app.put('/class/:id', async (req, res) => {
+    try {
+        res.json(await ClassSchema.findByIdAndUpdate(req.params.id, req.body, {new: true}))
+    } catch (err) {
+        console.log(err)
+        res.json(err)
+    }
+})
+
+app.delete(`/class/:id`, async (req, res) => {
+    try {
+        res.json(await ClassSchema.deleteOne({ _id: req.params.id }))
+    } catch (err) {
+        console.log(err)
+        res.json(err)
     }
 })
 
